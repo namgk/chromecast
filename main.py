@@ -42,39 +42,6 @@ def deleteUrl(uid):
   else:
     return res.result, 400
 
-@app.route('/cron')
-def cron():
-  urls = urlBackend.getUrls()
-  if not urls.ok:
-    return 'error fetching data', 400
-
-  for url in urls.result:
-    if 'attempt' not in url:
-      url['attempt'] = 0
-    if url['attempt'] is None:
-      url['attempt'] = 0
-    # is Python so complex???
-
-    try:
-      res = urllib2.urlopen(url['url'], timeout = 5)
-      assert res.getcode() == 200
-      if url['status'] != 'ok':
-        url['status'] = 'ok'
-        url['attempt'] = 0
-        urlBackend.updateUrl(url)
-    except Exception as err:
-      url['attempt'] = url['attempt'] + 1
-
-      if url['attempt'] >= 3 and url['status'] != 'failed':
-        url['status'] = 'failed'
-        mail.AdminEmailMessage(
-          sender='giangnam.bkdtvt@gmail.com',
-          subject="Server down! {}".format(url['url']),
-          body="{}".format(err)).Send()
-      urlBackend.updateUrl(url)
-
-  return 'ok'
-
 @app.route('/admin')
 def admin():
   user = users.get_current_user()

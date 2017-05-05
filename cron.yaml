@@ -1,4 +1,0 @@
-cron:
- - description: test every 2 minutes
-   url: /cron
-   schedule: every 2 minutes synchronized
